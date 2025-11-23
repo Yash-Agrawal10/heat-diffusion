@@ -50,3 +50,16 @@ TEST_CASE("test analytic at center") {
 
     CHECK(u_at_center == doctest::Approx(expected_value).epsilon(1e-12));
 }
+
+TEST_CASE("test analytic unit cube scaling") {
+    double t = 0.1;
+    double h = 0.1;
+    double x_index = 5;
+    double y_index = 5;
+    double z_index = 5;
+
+    double u_at_scaled = u_analytic_unit_cube(x_index, y_index, z_index, t, h);
+    double expected_value = u_analytic(x_index * h, y_index * h, z_index * h, t);
+
+    CHECK(u_at_scaled == doctest::Approx(expected_value).epsilon(1e-12));
+}
