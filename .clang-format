@@ -1,0 +1,32 @@
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+
+# Constructor initializer lists
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+
+# Spaced brace initializers
+SpacesInBracedInitList: true
+Cpp11BracedListStyle: false
+
+# Line length
+ColumnLimit: 120
+
+# Pointer and reference alignment
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Namespace comments
+FixNamespaceComments: true
+AllowShortNamespacesOnASingleLine: false
+ShortNamespaceLines: 0
+
+# Break templates
+AlwaysBreakTemplateDeclarations: Yes
+
+# Indent directives
+IndentPPDirectives: BeforeHash
+IndentPragmas: true
