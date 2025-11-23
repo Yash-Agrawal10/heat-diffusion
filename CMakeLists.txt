@@ -8,7 +8,7 @@ project(heat-diffusion
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# add_subdirectory(src)
+add_subdirectory(src)
 
 include(CTest)
 add_subdirectory(tests)

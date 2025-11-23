@@ -15,7 +15,14 @@ target_include_directories(test_helpers
 )
 
 add_executable(test_analytic test_analytic.cpp)
-target_link_libraries(test_analytic
+target_link_libraries(test_analytic PRIVATE
+    test_helpers
+    doctest::doctest
+)
+
+add_executable(test_solver test_solver.cpp)
+target_link_libraries(test_solver PRIVATE
+    solver
     test_helpers
     doctest::doctest
 )
