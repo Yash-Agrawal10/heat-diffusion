@@ -26,13 +26,13 @@ inline std::vector<double> heat_diffusion_solver(const ProblemSpec& spec, Kernel
     // Run kernel
 #ifdef PROFILE
     auto start = std::chrono::high_resolution_clock::now();
-#endif
     auto result = kernel(consts, u, u_new, verbose);
-#ifdef PROFILE
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
     // Timing section created by kernel
     std::cout << "total=" << elapsed.count() << " s\n";
+#else
+    auto result = kernel(consts, u, u_new, verbose);
 #endif
     return result;
 }
