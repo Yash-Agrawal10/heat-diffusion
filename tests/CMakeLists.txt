@@ -19,6 +19,7 @@ target_link_libraries(test_analytic PRIVATE
     test_helpers
     doctest::doctest
 )
+add_test(NAME test_analytic COMMAND srun ./test_analytic)
 
 add_executable(test_solver test_solver.cpp)
 target_link_libraries(test_solver PRIVATE
@@ -26,5 +27,4 @@ target_link_libraries(test_solver PRIVATE
     test_helpers
     doctest::doctest
 )
-
-add_test(NAME test_analytic COMMAND test_analytic)
+add_test(NAME test_solver COMMAND srun ./test_solver)
