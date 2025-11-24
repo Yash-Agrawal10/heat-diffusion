@@ -11,7 +11,7 @@ add_library(test_helpers
 )
 target_include_directories(test_helpers 
     PUBLIC
-     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_executable(test_analytic test_analytic.cpp)
@@ -21,10 +21,12 @@ target_link_libraries(test_analytic PRIVATE
 )
 add_test(NAME test_analytic COMMAND srun ./test_analytic)
 
-add_executable(test_solver test_solver.cpp)
-target_link_libraries(test_solver PRIVATE
+add_executable(test_kernel_slow test_kernel_slow.cpp)
+target_link_libraries(test_kernel_slow PRIVATE
+    kernel_slow
+    problem_spec
     solver
     test_helpers
     doctest::doctest
 )
-add_test(NAME test_solver COMMAND srun ./test_solver)
+add_test(NAME test_kernel_slow COMMAND srun ./test_kernel_slow)

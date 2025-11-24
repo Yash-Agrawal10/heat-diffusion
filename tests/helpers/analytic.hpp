@@ -1,5 +1,12 @@
 #pragma once
 
-double u_analytic(double x, double y, double z, double t);
+#include <cmath>
+#include <vector>
 
-double u_analytic_unit_cube(double x_index, double y_index, double z_index, double t, double h);
+inline double analytic_solution(double x, double y, double z, double t) {
+    return std::sin(M_PI * x) * std::sin(M_PI * y) * std::sin(M_PI * z) * std::exp(-3 * M_PI * M_PI * t);
+}
+
+inline double analytic_initial_condition(double x, double y, double z) { return analytic_solution(x, y, z, 0.0); }
+
+std::vector<double> analytic_unit_cube(int N, double T);

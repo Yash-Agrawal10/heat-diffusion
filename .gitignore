@@ -1,4 +1,5 @@
 build/
 proposal/
 output/
+.vscode/
 .DS_Store

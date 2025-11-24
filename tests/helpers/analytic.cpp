@@ -1,11 +1,21 @@
 #include "analytic.hpp"
 
-#include <cmath>
+#include <vector>
 
-double u_analytic(double x, double y, double z, double t) {
-    return std::sin(M_PI * x) * std::sin(M_PI * y) * std::sin(M_PI * z) * std::exp(-3 * M_PI * M_PI * t);
-}
+std::vector<double> analytic_unit_cube(int N, double T) {
+    std::vector<double> u(N * N * N);
+    double h = 1.0 / (N - 1);
 
-double u_analytic_unit_cube(double x_index, double y_index, double z_index, double t, double h) {
-    return u_analytic(x_index * h, y_index * h, z_index * h, t);
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            for (int k = 0; k < N; ++k) {
+                double x = i * h;
+                double y = j * h;
+                double z = k * h;
+                u[i * N * N + j * N + k] = analytic_solution(x, y, z, T);
+            }
+        }
+    }
+
+    return u;
 }
