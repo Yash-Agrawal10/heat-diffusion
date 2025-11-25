@@ -30,3 +30,13 @@ target_link_libraries(test_kernel_slow PRIVATE
     doctest::doctest
 )
 add_test(NAME test_kernel_slow COMMAND srun ./test_kernel_slow)
+
+add_executable(test_kernel_fast test_kernel_fast.cpp)
+target_link_libraries(test_kernel_fast PRIVATE
+    kernel_fast
+    problem_spec
+    solver
+    test_helpers
+    doctest::doctest
+)
+add_test(NAME test_kernel_fast COMMAND srun ./test_kernel_fast)

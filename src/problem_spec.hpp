@@ -28,10 +28,14 @@ inline std::vector<double> initial_condition_unit_cube(int N, IC_Func ic_func) {
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
             for (int k = 0; k < N; ++k) {
-                double x = i * h;
-                double y = j * h;
-                double z = k * h;
-                u[i * N * N + j * N + k] = ic_func(x, y, z);
+                if (i == 0 || i == N - 1 || j == 0 || j == N - 1 || k == 0 || k == N - 1) {
+                    u[i * N * N + j * N + k] = 0.0;
+                } else {
+                    double x = i * h;
+                    double y = j * h;
+                    double z = k * h;
+                    u[i * N * N + j * N + k] = ic_func(x, y, z);
+                }
             }
         }
     }

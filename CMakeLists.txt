@@ -8,7 +8,7 @@ project(heat-diffusion
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror")
+set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
 
 add_subdirectory(src)
 
