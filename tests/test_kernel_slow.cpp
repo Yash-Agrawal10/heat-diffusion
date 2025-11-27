@@ -3,7 +3,7 @@
 
 #include "helpers/analytic.hpp"
 #include "helpers/compare.hpp"
-#include "kernels.hpp"
+#include "kernel_slow.hpp"
 #include "problem_spec.hpp"
 #include "solver.hpp"
 

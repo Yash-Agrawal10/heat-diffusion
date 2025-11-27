@@ -23,7 +23,7 @@ add_test(NAME test_analytic COMMAND srun ./test_analytic)
 
 add_executable(test_kernel_slow test_kernel_slow.cpp)
 target_link_libraries(test_kernel_slow PRIVATE
-    kernels
+    kernel_slow
     problem_spec
     solver
     test_helpers
@@ -33,7 +33,7 @@ add_test(NAME test_kernel_slow COMMAND srun ./test_kernel_slow)
 
 add_executable(test_kernel_fast test_kernel_fast.cpp)
 target_link_libraries(test_kernel_fast PRIVATE
-    kernels
+    kernel_fast
     problem_spec
     solver
     test_helpers

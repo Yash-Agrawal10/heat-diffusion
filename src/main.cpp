@@ -1,4 +1,5 @@
-#include "kernels.hpp"
+#include "kernel_fast.hpp"
+#include "kernel_slow.hpp"
 #include "problem_spec.hpp"
 #include "solver.hpp"
 
