@@ -1,4 +1,4 @@
-#include "kernel_slow.hpp"
+#include "kernels.hpp"
 
 #include "problem_spec.hpp"
 
@@ -8,10 +8,10 @@
 #include <vector>
 
 std::vector<double> heat_diffusion_kernel_fast(const Constants& consts, std::vector<double>& u,
-                                                std::vector<double>& u_new, bool verbose) {
+                                               std::vector<double>& u_new, bool verbose) {
     const int N = consts.N;
 #ifdef PROFILE
-    (void)verbose;  // Suppress unused variable warning
+    (void)verbose; // Suppress unused variable warning
 #endif
 
 #ifndef PROFILE

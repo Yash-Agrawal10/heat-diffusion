@@ -1,4 +1,4 @@
-#include "kernel_slow.hpp"
+#include "kernels.hpp"
 
 #include "problem_spec.hpp"
 
