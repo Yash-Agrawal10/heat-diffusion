@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "default",
+      "binaryDir": "build",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "/opt/ohpc/pub/mpi/openmpi4-gnu12/4.1.8/bin/mpicxx"
+      },
+      "environment": {
+        "OMPI_CXX": "/opt/rocm-7.1.0/bin/hipcc"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "environment": {
+        "OMPI_CXX": "/opt/rocm-7.1.0/bin/hipcc"
+      }
+    }
+  ]
+}

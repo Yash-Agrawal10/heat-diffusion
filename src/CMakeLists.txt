@@ -12,7 +12,11 @@ target_compile_definitions(kernel_slow_profile PRIVATE PROFILE)
 
 add_library(kernel_fast_profile kernel_fast.cpp)
 target_link_libraries(kernel_fast_profile PUBLIC problem_spec)
-target_include_directories(kernel_fast_profile PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(kernel_fast_profile PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "/opt/rocm-7.1.0/include"
+    "/opt/ohpc/pub/mpi/openmpi4-gnu12/4.1.8/include"
+)
 target_compile_definitions(kernel_fast_profile PRIVATE PROFILE)
 
 add_executable(heat_diffusion_profile main.cpp)
@@ -26,7 +30,11 @@ target_include_directories(kernel_slow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(kernel_fast kernel_fast.cpp)
 target_link_libraries(kernel_fast PUBLIC problem_spec)
-target_include_directories(kernel_fast PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(kernel_fast PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    "/opt/rocm-7.1.0/include"
+    "/opt/ohpc/pub/mpi/openmpi4-gnu12/4.1.8/include"
+)
 
 add_executable(heat_diffusion main.cpp)
 target_link_libraries(heat_diffusion PRIVATE kernel_slow kernel_fast problem_spec solver)
