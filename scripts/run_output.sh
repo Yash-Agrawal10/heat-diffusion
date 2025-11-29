@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH -J heat_diffusion
-#SBATCH -o ./output/out/%j.out
+#SBATCH -o ./output/out/%j-output.out
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -t 00:10:00
