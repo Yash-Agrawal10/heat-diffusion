@@ -12,6 +12,7 @@ int main(int argc, char* argv[]) {
     int N = -1;
     double T = -1;
     std::string mode = "";
+    bool verbose = false;
 
     for (int i = 0; i < argc; ++i) {
         std::string arg = argv[i];
@@ -21,11 +22,13 @@ int main(int argc, char* argv[]) {
             T = std::stod(argv[++i]);
         } else if (arg == "--mode" && i + 1 < argc) {
             mode = argv[++i];
+        } else if (arg == "--verbose") {
+            verbose = true;
         }
     }
 
     if (N < 0 || T < 0 || (mode != "slow" && mode != "fast")) {
-        std::cerr << "Usage: " << argv[0] << " -N <int> -T <double> --mode <slow|fast>\n";
+        std::cerr << "Usage: " << argv[0] << " -N <int> -T <double> --mode <slow|fast> [--verbose]\n";
         return 1;
     }
 
@@ -40,7 +43,7 @@ int main(int argc, char* argv[]) {
     ProblemSpec spec{ N, T, initial_condition };
 
     // Perform heat diffusion
-    auto u = heat_diffusion_solver(spec, mode == "slow" ? heat_diffusion_kernel_slow : heat_diffusion_kernel_fast);
+    auto u = heat_diffusion_solver(spec, mode == "slow" ? heat_diffusion_kernel_slow : heat_diffusion_kernel_fast, verbose);
 
     // Temporarily output something for non-profile runs
 #ifndef PROFILE

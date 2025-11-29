@@ -65,7 +65,7 @@ std::vector<double> heat_diffusion_kernel_fast(const Constants& consts, std::vec
         hipMemcpy(u.data(), d_u, u.size() * sizeof(double), hipMemcpyDeviceToHost);
         int step = n + 1;
         if (verbose && step != consts.n_steps && step % output_interval == 0) {
-            dump_state(u, n, step);
+            dump_state(u, N, step);
         }
 #endif
     }
