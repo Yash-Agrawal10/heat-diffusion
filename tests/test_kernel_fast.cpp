@@ -1,5 +1,7 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest/doctest.h>
+
+#include <mpi.h>
 
 #include "helpers/analytic.hpp"
 #include "helpers/compare.hpp"
@@ -69,4 +71,14 @@ TEST_CASE("test fast kernel for N=64, T=1.0") {
     // Compare solver solution to analytic solution
     double max_error = get_max_error(u_numerical, u_analytic, N);
     CHECK(max_error < epsilon);
+}
+
+int main(int argc, char* argv[]) {
+    MPI_Init(&argc, &argv);
+
+    doctest::Context ctx;
+    int res = ctx.run();
+
+    MPI_Finalize();
+    return res;
 }

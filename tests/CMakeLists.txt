@@ -39,4 +39,5 @@ target_link_libraries(test_kernel_fast PRIVATE
     test_helpers
     doctest::doctest
 )
-add_test(NAME test_kernel_fast COMMAND srun ./test_kernel_fast)
+target_include_directories(test_kernel_fast PRIVATE "/opt/ohpc/pub/mpi/openmpi4-gnu12/4.1.8/include")
+add_test(NAME test_kernel_fast COMMAND srun -n 4 ./test_kernel_fast)

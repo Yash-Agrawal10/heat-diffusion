@@ -3,7 +3,7 @@
 #SBATCH -J heat_diffusion_solver_fast
 #SBATCH -o ./output/solver/fast/output/%j.out
 #SBATCH -N 1
-#SBATCH -n 1
+#SBATCH -n 4
 #SBATCH -t 00:10:00
 #SBATCH -p mi2104x
 

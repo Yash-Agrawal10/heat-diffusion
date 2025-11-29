@@ -3,6 +3,8 @@
 #include "problem_spec.hpp"
 #include "solver.hpp"
 
+#include <mpi.h>
+
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -27,9 +29,34 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    int rank, size;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
     if (N < 0 || T < 0 || (mode != "slow" && mode != "fast")) {
-        std::cerr << "Usage: " << argv[0] << " -N <int> -T <double> --mode <slow|fast> [--verbose]\n";
+        if (rank == 0) {
+            std::cerr << "Usage: " << argv[0] << " -N <int> -T <double> --mode <slow|fast> [--verbose]\n";
+        }
+        MPI_Finalize();
         return 1;
+    } else if (mode == "slow" && size != 1) {
+        if (rank == 0) {
+            std::cerr << "Error: 'slow' mode only supports single process execution.\n";
+        }
+        MPI_Finalize();
+        return 1;
+    } else {
+        if (rank == 0) {
+            std::cout << "Running heat diffusion solver with N=" << N << ", T=" << T << ", mode=" << mode
+                      << ", verbose=" << (verbose ? "true" : "false") << ", MPI size=" << size << "\n";
+        }
+    }
+
+    // Temporarily only run rank 0
+    if (rank != 0) {
+        MPI_Finalize();
+        return 0;
     }
 
     // Define problem
@@ -43,11 +70,14 @@ int main(int argc, char* argv[]) {
     ProblemSpec spec{ N, T, initial_condition };
 
     // Perform heat diffusion
-    auto u = heat_diffusion_solver(spec, mode == "slow" ? heat_diffusion_kernel_slow : heat_diffusion_kernel_fast, verbose);
+    auto u =
+        heat_diffusion_solver(spec, mode == "slow" ? heat_diffusion_kernel_slow : heat_diffusion_kernel_fast, verbose);
 
     // Temporarily output something for non-profile runs
 #ifndef PROFILE
-    std::cout << "Final value at center: " << u[(N / 2) * N * N + (N / 2) * N + (N / 2)] << "\n";
+    if (rank == 0) {
+        std::cout << "Final value at center: " << u[(N / 2) * N * N + (N / 2) * N + (N / 2)] << "\n";
+    }
 #endif
 
     // Return success
