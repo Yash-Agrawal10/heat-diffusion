@@ -11,7 +11,7 @@
 
 int main(int argc, char* argv[]) {
     // Version number for printing
-    int version = 1;
+    int version = 2;
 
     // Parse command line arguments
     int N = -1;
