@@ -10,6 +10,9 @@
 #include <vector>
 
 int main(int argc, char* argv[]) {
+    // Version number for printing
+    int version = 1;
+
     // Parse command line arguments
     int N = -1;
     double T = -1;
@@ -48,7 +51,7 @@ int main(int argc, char* argv[]) {
         return 1;
     } else {
         if (rank == 0) {
-            std::cout << "Running heat diffusion solver with N=" << N << ", T=" << T << ", mode=" << mode
+            std::cout << "Running heat diffusion solver version " << version << " with N=" << N << ", T=" << T << ", mode=" << mode
                       << ", verbose=" << (verbose ? "true" : "false") << ", MPI size=" << size << "\n";
         }
     }
