@@ -4,9 +4,9 @@
 
 __global__ void kernel_fast(const double* __restrict__ u, double* __restrict__ u_new, const int N,
                                            const double lambda) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int k = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
-    int k = blockIdx.z * blockDim.z + threadIdx.z;
+    int i = blockIdx.z * blockDim.z + threadIdx.z;
     int idx = i * N * N + j * N + k;
 
     if (i > 0 && i < N - 1 && j > 0 && j < N - 1 && k > 0 && k < N - 1) {
