@@ -8,7 +8,8 @@ void kernel_cpu(std::vector<double>& u, std::vector<double>& u_new, int N, doubl
 
 __global__ void kernel_shared_gpu(const double* u, double* u_new, int N, double lambda);
 
-__global__ void kernel_distributed_gpu(const double* u, double* u_new, int N_x, int N_y, int N_z, double lambda);
+__global__ void kernel_distributed_gpu(const double* u, double* u_new, int N, int N_x, int N_y, int N_z, int i_start,
+                                       int j_start, int k_start, double lambda);
 
 enum class FaceSide { minus, plus };
 

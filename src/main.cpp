@@ -1,6 +1,7 @@
 #include "solvers/solvers.hpp"
 #include "util/problem_spec.hpp"
 
+#include <hip/hip_runtime.h>
 #include <mpi.h>
 
 #include <cmath>
@@ -19,8 +20,20 @@ int main(int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // Version number for printing
-    int version = 3;
+    MPI_Comm node_comm;
+    MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &node_comm);
+    int local_size = 0;
+    MPI_Comm_size(node_comm, &local_size);
+    MPI_Comm_free(&node_comm);
+    int nodes = size / local_size;
+
+    // Get number of available HIP devices
+    int device_count = 0;
+    hipError_t err = hipGetDeviceCount(&device_count);
+    if (err != hipSuccess) {
+        std::cerr << "Failed to get HIP device count: " << hipGetErrorString(err) << std::endl;
+        device_count = -1;
+    }
 
     // Parse command line arguments
     int N = -1;
@@ -91,12 +104,13 @@ int main(int argc, char* argv[]) {
     // Print problem details
     if (rank == 0) {
         std::cout << "Heat Diffusion Simulation\n";
-        std::cout << "Version: " << version << "\n";
         std::cout << "Grid points (N): " << N << "\n";
         std::cout << "Total time (T): " << T << "\n";
         std::cout << "Mode: " << mode_str << "\n";
         std::cout << "Kernel: " << kernel_str << "\n";
         std::cout << "MPI Ranks: " << size << "\n";
+        std::cout << "Nodes: " << nodes << "\n";
+        std::cout << "Num devices (on node containing rank 0): " << device_count << "\n";
         std::cout << std::endl;
     }
 

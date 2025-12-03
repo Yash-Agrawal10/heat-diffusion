@@ -2,8 +2,8 @@
 
 #SBATCH -J heat_diffusion_output_distributed_gpu
 #SBATCH -o ./output/output/distributed_gpu/output/%j.out
-#SBATCH -N 1
-#SBATCH -n 8
+#SBATCH -N 4
+#SBATCH -n 16
 #SBATCH -t 00:10:00
 #SBATCH -p mi2104x
 

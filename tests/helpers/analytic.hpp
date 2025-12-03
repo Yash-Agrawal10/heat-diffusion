@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/decomposition.hpp"
+
 #include <cmath>
 #include <vector>
 
@@ -10,3 +12,5 @@ inline double analytic_solution(double x, double y, double z, double t) {
 inline double analytic_initial_condition(double x, double y, double z) { return analytic_solution(x, y, z, 0.0); }
 
 std::vector<double> analytic_unit_cube(int N, double T);
+
+std::vector<double> analytic_distributed(int N, Decomposition& decomp, double T);

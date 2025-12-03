@@ -10,6 +10,13 @@
 #include <chrono>
 #include <iostream>
 
+void check_hip_error(hipError_t err) {
+    if (err != hipSuccess) {
+        std::cerr << "HIP Error: " << hipGetErrorString(err) << std::endl;
+        exit(-1);
+    }
+}
+
 std::vector<double> solver_shared_gpu(const ProblemSpec& spec, Mode mode, bool verbose) {
     using Clock = std::chrono::high_resolution_clock;
 
@@ -63,8 +70,8 @@ std::vector<double> solver_shared_gpu(const ProblemSpec& spec, Mode mode, bool v
         }
     }
 
+    check_hip_error(hipDeviceSynchronize());
     hipMemcpy(u.data(), d_u, u.size() * sizeof(double), hipMemcpyDeviceToHost);
-
     hipFree(d_u);
     hipFree(d_u_new);
 

@@ -2,6 +2,7 @@
 
 #include "kernels/kernels.hpp"
 #include "util/constants.hpp"
+#include "util/decomposition.hpp"
 #include "util/initial_condition.hpp"
 #include "util/output.hpp"
 
@@ -11,7 +12,7 @@
 #include <chrono>
 #include <iostream>
 
-void check_hip_error(hipError_t err) {
+void check_hip_error_mpi(hipError_t err) {
     if (err != hipSuccess) {
         std::cerr << "HIP Error: " << hipGetErrorString(err) << std::endl;
         MPI_Abort(MPI_COMM_WORLD, -1);
@@ -19,29 +20,25 @@ void check_hip_error(hipError_t err) {
 }
 
 std::vector<double> solver_distributed_gpu(const ProblemSpec& spec, Mode mode, bool verbose) {
+    // Create MPI grid
+    Decomposition decomp = make_decomposition(spec.N, MPI_COMM_WORLD);
+
+    // Call the helper function
+    return solver_distributed_gpu_helper(spec, mode, verbose, decomp);
+}
+
+std::vector<double> solver_distributed_gpu_helper(const ProblemSpec& spec, Mode mode, bool verbose,
+                                                  Decomposition& decomp) {
     using Clock = std::chrono::high_resolution_clock;
+
+    int rank = decomp.rank;
+    MPI_Comm cart_comm = decomp.cart_comm;
 
     // Temporarily disable output mode
     if (mode == Mode::output) {
         std::cout << "Output mode is not yet supported in the distributed GPU solver. Switching to eval mode.\n";
         mode = Mode::eval;
     }
-
-    // Create MPI grid
-    int rank, size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    int dims[3] = { 0, 0, 0 };
-    MPI_Dims_create(size, 3, dims);
-    int periods[3] = { 0, 0, 0 };
-    MPI_Comm cart_comm;
-    MPI_Cart_create(MPI_COMM_WORLD, 3, dims, periods, 0, &cart_comm);
-    int coords[3];
-    MPI_Cart_coords(cart_comm, rank, 3, coords);
-    int px = coords[0];
-    int py = coords[1];
-    int pz = coords[2];
 
     // Bind ranks to GPUs
     int device_count = 0;
@@ -52,9 +49,9 @@ std::vector<double> solver_distributed_gpu(const ProblemSpec& spec, Mode mode, b
     // Define constants
     Constants consts = compute_constants(spec);
     const int N = consts.N;
-    const int N_x = (px < N % dims[0]) ? (N / dims[0] + 1) : (N / dims[0]);
-    const int N_y = (py < N % dims[1]) ? (N / dims[1] + 1) : (N / dims[1]);
-    const int N_z = (pz < N % dims[2]) ? (N / dims[2] + 1) : (N / dims[2]);
+    const int N_x = (decomp.coords[0] < N % decomp.dims[0]) ? (N / decomp.dims[0] + 1) : (N / decomp.dims[0]);
+    const int N_y = (decomp.coords[1] < N % decomp.dims[1]) ? (N / decomp.dims[1] + 1) : (N / decomp.dims[1]);
+    const int N_z = (decomp.coords[2] < N % decomp.dims[2]) ? (N / decomp.dims[2] + 1) : (N / decomp.dims[2]);
     const int N_x_total = N_x + 2;
     const int N_y_total = N_y + 2;
     const int N_z_total = N_z + 2;
@@ -87,8 +84,7 @@ std::vector<double> solver_distributed_gpu(const ProblemSpec& spec, Mode mode, b
     MPI_Request requests[12];
 
     // Allocate and initialize host memory
-    auto u =
-        initial_condition_distributed(N, N_x, N_y, N_z, px, py, pz, dims[0], dims[1], dims[2], spec.initial_condition);
+    auto u = initial_condition_distributed(N, decomp, spec.initial_condition);
     std::vector<double> u_new(N_x_total * N_y_total * N_z_total, 0.0);
 
     // Allocate and initialize device memory
@@ -145,7 +141,7 @@ std::vector<double> solver_distributed_gpu(const ProblemSpec& spec, Mode mode, b
         pack_y<<<pack_y_grid_size, pack_y_block_size>>>(d_u, d_send_yp, N_x, N_y, N_z, FaceSide::plus);
         pack_z<<<pack_z_grid_size, pack_z_block_size>>>(d_u, d_send_zm, N_x, N_y, N_z, FaceSide::minus);
         pack_z<<<pack_z_grid_size, pack_z_block_size>>>(d_u, d_send_zp, N_x, N_y, N_z, FaceSide::plus);
-        check_hip_error(hipDeviceSynchronize());
+        check_hip_error_mpi(hipDeviceSynchronize());
 
         int r = 0;
 
@@ -173,7 +169,8 @@ std::vector<double> solver_distributed_gpu(const ProblemSpec& spec, Mode mode, b
         unpack_z<<<pack_z_grid_size, pack_z_block_size>>>(d_recv_zp, d_u, N_x, N_y, N_z, FaceSide::plus);
 
         // Execute kernel
-        kernel_distributed_gpu<<<kernel_grid_size, kernel_block_size>>>(d_u, d_u_new, N_x, N_y, N_z, consts.lambda);
+        kernel_distributed_gpu<<<kernel_grid_size, kernel_block_size>>>(d_u, d_u_new, N, N_x, N_y, N_z, decomp.i_start,
+                                                                        decomp.j_start, decomp.k_start, consts.lambda);
 
         // Swap pointers
         std::swap(d_u, d_u_new);
@@ -183,9 +180,25 @@ std::vector<double> solver_distributed_gpu(const ProblemSpec& spec, Mode mode, b
         }
     }
 
-    check_hip_error(hipDeviceSynchronize());
+    check_hip_error_mpi(hipDeviceSynchronize());
+    hipMemcpy(u.data(), d_u, u.size() * sizeof(double), hipMemcpyDeviceToHost);
+    hipFree(d_u);
+    hipFree(d_u_new);
+    hipFree(d_send_xm);
+    hipFree(d_send_xp);
+    hipFree(d_send_ym);
+    hipFree(d_send_yp);
+    hipFree(d_send_zm);
+    hipFree(d_send_zp);
+    hipFree(d_recv_xm);
+    hipFree(d_recv_xp);
+    hipFree(d_recv_ym);
+    hipFree(d_recv_yp);
+    hipFree(d_recv_zm);
+    hipFree(d_recv_zp);
+
     if (verbose && rank == 0) {
-        std::cout << "Main time-stepping loop complete.\n";
+        std::cout << "Finished distributed GPU solver.\n" << std::endl;
     }
     auto end = Clock::now();
     if (mode == Mode::profile && rank == 0) {
