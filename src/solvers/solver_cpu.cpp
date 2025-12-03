@@ -8,7 +8,7 @@
 #include <chrono>
 #include <iostream>
 
-std::vector<double> solver_slow(const ProblemSpec& spec, Mode mode, bool verbose) {
+std::vector<double> solver_cpu(const ProblemSpec& spec, Mode mode, bool verbose) {
     using Clock = std::chrono::high_resolution_clock;
 
     // Define constants
@@ -31,13 +31,13 @@ std::vector<double> solver_slow(const ProblemSpec& spec, Mode mode, bool verbose
     }
 
     for (int step = 0; step < consts.n_steps; ++step) {
-        kernel_slow(u, u_new, spec.N, consts.lambda);
+        kernel_cpu(u, u_new, spec.N, consts.lambda);
         std::swap(u, u_new);
 
         if (mode == Mode::output && (step + 1) % output_interval == 0 && (step + 1) != consts.n_steps) {
             dump_state(u, spec.N, step + 1);
         }
-        if (verbose && (step + 1) % (consts.n_steps / 10) == 0) {
+        if (verbose && (step + 1) % (consts.n_steps / 100) == 0) {
             std::cout << "Completed " << (step + 1) << " / " << consts.n_steps << " steps...\n";
         }
     }

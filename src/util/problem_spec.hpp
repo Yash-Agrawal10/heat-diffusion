@@ -14,4 +14,4 @@ struct ProblemSpec {
 
 enum class Mode { profile, output, eval };
 
-enum class Kernel { slow, fast };
+enum class Kernel { cpu, shared_gpu, distributed_gpu };

@@ -6,7 +6,7 @@
 #include "solvers/solvers.hpp"
 #include "util/problem_spec.hpp"
 
-TEST_CASE("test slow kernel for N=32, T=0.1") {
+TEST_CASE("test cpu kernel for N=32, T=0.1") {
     // Define constants
     const int N = 32;
     const double T = 0.1;
@@ -14,7 +14,7 @@ TEST_CASE("test slow kernel for N=32, T=0.1") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = solver_slow(spec, Mode::eval);
+    auto u_numerical = solver_cpu(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution
@@ -22,7 +22,7 @@ TEST_CASE("test slow kernel for N=32, T=0.1") {
     CHECK(max_error < epsilon);
 }
 
-TEST_CASE("test slow kernel for N=64, T=0.05") {
+TEST_CASE("test cpu kernel for N=64, T=0.05") {
     // Define constants
     const int N = 64;
     const double T = 0.05;
@@ -30,7 +30,7 @@ TEST_CASE("test slow kernel for N=64, T=0.05") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = solver_slow(spec, Mode::eval);
+    auto u_numerical = solver_cpu(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution
@@ -38,7 +38,7 @@ TEST_CASE("test slow kernel for N=64, T=0.05") {
     CHECK(max_error < epsilon);
 }
 
-TEST_CASE("test slow kernel for N=100, T=0.1") {
+TEST_CASE("test cpu kernel for N=100, T=0.1") {
     // Define constants
     const int N = 100;
     const double T = 0.1;
@@ -46,7 +46,7 @@ TEST_CASE("test slow kernel for N=100, T=0.1") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = solver_slow(spec, Mode::eval);
+    auto u_numerical = solver_cpu(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution
@@ -54,7 +54,7 @@ TEST_CASE("test slow kernel for N=100, T=0.1") {
     CHECK(max_error < epsilon);
 }
 
-TEST_CASE("test slow kernel for N=64, T=1.0") {
+TEST_CASE("test cpu kernel for N=64, T=1.0") {
     // Define constants
     const int N = 64;
     const double T = 1.0;
@@ -62,7 +62,7 @@ TEST_CASE("test slow kernel for N=64, T=1.0") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = solver_slow(spec, Mode::eval);
+    auto u_numerical = solver_cpu(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution

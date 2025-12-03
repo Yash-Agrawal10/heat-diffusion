@@ -9,7 +9,7 @@
 
 void print_usage() {
     std::cout << "Usage: ./heat_diffusion -N <num_grid_points> -T <total_time> --mode <eval|profile|output> --kernel "
-                 "<slow|fast>\n";
+                 "<cpu|shared_gpu|distributed_gpu>\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -18,14 +18,9 @@ int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    // Temporarily only run rank 0
-    if (rank != 0) {
-        MPI_Finalize();
-        return 0;
-    }
 
     // Version number for printing
-    int version = 2;
+    int version = 3;
 
     // Parse command line arguments
     int N = -1;
@@ -62,15 +57,23 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Kernel kernel = Kernel::fast;
-    if (kernel_str == "slow") {
-        kernel = Kernel::slow;
-    } else if (kernel_str == "fast") {
-        kernel = Kernel::fast;
+    Kernel kernel = Kernel::cpu;
+    if (kernel_str == "cpu") {
+        kernel = Kernel::cpu;
+    } else if (kernel_str == "shared_gpu") {
+        kernel = Kernel::shared_gpu;
+    } else if (kernel_str == "distributed_gpu") {
+        kernel = Kernel::distributed_gpu;
     } else {
         std::cerr << "Error: Invalid kernel specified." << std::endl;
         print_usage();
         return 1;
+    }
+    if (kernel != Kernel::distributed_gpu && size > 1) {
+        if (rank == 0) {
+            std::cerr << "Only the distributed_gpu kernel supports multiple MPI ranks." << std::endl;
+        }
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     if (N <= 0) {
@@ -86,13 +89,16 @@ int main(int argc, char* argv[]) {
     }
 
     // Print problem details
-    std::cout << "Heat Diffusion Simulation\n";
-    std::cout << "Version: " << version << "\n";
-    std::cout << "Grid points (N): " << N << "\n";
-    std::cout << "Total time (T): " << T << "\n";
-    std::cout << "Mode: " << mode_str << "\n";
-    std::cout << "Kernel: " << kernel_str << "\n";
-    std::cout << std::endl;
+    if (rank == 0) {
+        std::cout << "Heat Diffusion Simulation\n";
+        std::cout << "Version: " << version << "\n";
+        std::cout << "Grid points (N): " << N << "\n";
+        std::cout << "Total time (T): " << T << "\n";
+        std::cout << "Mode: " << mode_str << "\n";
+        std::cout << "Kernel: " << kernel_str << "\n";
+        std::cout << "MPI Ranks: " << size << "\n";
+        std::cout << std::endl;
+    }
 
     // Define problem
     auto initial_condition = [](double x, double y, double z) {
@@ -106,10 +112,17 @@ int main(int argc, char* argv[]) {
 
     std::vector<double> u;
     // Call correct solver
-    if (kernel == Kernel::slow) {
-        u = solver_slow(spec, mode, verbose);
+    if (kernel == Kernel::cpu) {
+        u = solver_cpu(spec, mode, verbose);
+    } else if (kernel == Kernel::shared_gpu) {
+        u = solver_shared_gpu(spec, mode, verbose);
+    } else if (kernel == Kernel::distributed_gpu) {
+        u = solver_distributed_gpu(spec, mode, verbose);
     } else {
-        u = solver_fast(spec, mode, verbose);
+        if (rank == 0) {
+            std::cerr << "Error: Unknown kernel." << std::endl;
+        }
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     // Return success
