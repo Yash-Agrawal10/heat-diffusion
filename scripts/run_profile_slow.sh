@@ -9,5 +9,5 @@
 
 set -e
 
-echo "Running: srun ./build/src/heat_diffusion_profile $@ --mode slow"
-srun "./build/src/heat_diffusion_profile" "$@" --mode slow
+echo "Running: srun ./build/src/heat_diffusion $@ --kernel slow --mode profile"
+srun "./build/src/heat_diffusion" "$@" --kernel slow --mode profile

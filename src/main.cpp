@@ -1,24 +1,24 @@
-#include "kernel_fast.hpp"
-#include "kernel_slow.hpp"
-#include "problem_spec.hpp"
-#include "solver.hpp"
-
-#include <mpi.h>
+#include "solvers/solvers.hpp"
+#include "util/problem_spec.hpp"
 
 #include <cmath>
 #include <iostream>
 #include <vector>
 
+void print_usage() {
+    std::cout << "Usage: ./heat_diffusion -N <num_grid_points> -T <total_time> --mode <eval|profile|output> --kernel <slow|fast>\n";
+}
+
 int main(int argc, char* argv[]) {
     // Version number for printing
-    int version = 2;
+    int version = 0;
 
     // Parse command line arguments
     int N = -1;
     double T = -1;
-    std::string mode = "";
-    bool verbose = false;
-
+    std::string kernel_str = "";
+    std::string mode_str = "";
+    
     for (int i = 0; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "-N" && i + 1 < argc) {
@@ -26,40 +26,46 @@ int main(int argc, char* argv[]) {
         } else if (arg == "-T" && i + 1 < argc) {
             T = std::stod(argv[++i]);
         } else if (arg == "--mode" && i + 1 < argc) {
-            mode = argv[++i];
-        } else if (arg == "--verbose") {
-            verbose = true;
+            mode_str = argv[++i];
+        } else if (arg == "--kernel" && i + 1 < argc) {
+            kernel_str = argv[++i];
         }
     }
 
-    int rank, size;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    if (N < 0 || T < 0 || (mode != "slow" && mode != "fast")) {
-        if (rank == 0) {
-            std::cerr << "Usage: " << argv[0] << " -N <int> -T <double> --mode <slow|fast> [--verbose]\n";
-        }
-        MPI_Finalize();
-        return 1;
-    } else if (mode == "slow" && size != 1) {
-        if (rank == 0) {
-            std::cerr << "Error: 'slow' mode only supports single process execution.\n";
-        }
-        MPI_Finalize();
-        return 1;
+    Mode mode = Mode::eval;
+    if (mode_str == "profile") {
+        mode = Mode::profile;
+    } else if (mode_str == "output") {
+        mode = Mode::output;
+    } else if (mode_str == "eval") {
+        mode = Mode::eval;
     } else {
-        if (rank == 0) {
-            std::cout << "Running heat diffusion solver version " << version << " with N=" << N << ", T=" << T << ", mode=" << mode
-                      << ", verbose=" << (verbose ? "true" : "false") << ", MPI size=" << size << "\n";
-        }
+        std::cerr << "Error: Invalid mode specified." << std::endl;
+        print_usage();
+        return 1;
     }
 
-    // Temporarily only run rank 0
-    if (rank != 0) {
-        MPI_Finalize();
-        return 0;
+    Kernel kernel = Kernel::fast;
+    if (kernel_str == "slow") {
+        kernel = Kernel::slow;
+    } else if (kernel_str == "fast") {
+        kernel = Kernel::fast;
+    } else {
+        std::cerr << "Error: Invalid kernel specified." << std::endl;
+        print_usage();
+        return 1;
+    }
+
+    if (N <= 0) {
+        std::cerr << "Error: Number of grid points N must be positive." << std::endl;
+        print_usage();
+        return 1;
+    }
+
+    if (T < 0) {
+        std::cerr << "Error: Total simulation time T must be non-negative." << std::endl;
+        print_usage();
+        return 1;
     }
 
     // Define problem
@@ -72,16 +78,13 @@ int main(int argc, char* argv[]) {
     };
     ProblemSpec spec{ N, T, initial_condition };
 
-    // Perform heat diffusion
-    auto u =
-        heat_diffusion_solver(spec, mode == "slow" ? heat_diffusion_kernel_slow : heat_diffusion_kernel_fast, verbose);
-
-    // Temporarily output something for non-profile runs
-#ifndef PROFILE
-    if (rank == 0) {
-        std::cout << "Final value at center: " << u[(N / 2) * N * N + (N / 2) * N + (N / 2)] << "\n";
+    std::vector<double> u;
+    // Call correct solver
+    if (kernel == Kernel::slow) {
+        u = solver_slow(spec, mode);
+    } else {
+        u = solver_fast(spec, mode);
     }
-#endif
 
     // Return success
     return 0;

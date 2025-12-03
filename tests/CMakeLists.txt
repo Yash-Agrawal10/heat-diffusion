@@ -23,21 +23,25 @@ add_test(NAME test_analytic COMMAND srun ./test_analytic)
 
 add_executable(test_kernel_slow test_kernel_slow.cpp)
 target_link_libraries(test_kernel_slow PRIVATE
-    kernel_slow_solver
-    problem_spec
-    solver
     test_helpers
+    solvers
     doctest::doctest
+)
+target_include_directories(test_kernel_slow PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
 )
 add_test(NAME test_kernel_slow COMMAND srun ./test_kernel_slow)
 
 add_executable(test_kernel_fast test_kernel_fast.cpp)
 target_link_libraries(test_kernel_fast PRIVATE
-    kernel_fast_solver
-    problem_spec
-    solver
     test_helpers
+    solvers
     doctest::doctest
 )
-target_include_directories(test_kernel_fast PRIVATE "/opt/ohpc/pub/mpi/openmpi4-gnu12/4.1.8/include")
+target_include_directories(test_kernel_fast PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
+    "/opt/ohpc/pub/mpi/openmpi4-gnu12/4.1.8/include"
+)
 add_test(NAME test_kernel_fast COMMAND srun -n 4 ./test_kernel_fast)

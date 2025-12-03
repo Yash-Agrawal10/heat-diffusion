@@ -3,9 +3,8 @@
 
 #include "helpers/analytic.hpp"
 #include "helpers/compare.hpp"
-#include "kernel_slow.hpp"
-#include "problem_spec.hpp"
-#include "solver.hpp"
+#include "solvers/solvers.hpp"
+#include "util/problem_spec.hpp"
 
 TEST_CASE("test slow kernel for N=32, T=0.1") {
     // Define constants
@@ -15,7 +14,7 @@ TEST_CASE("test slow kernel for N=32, T=0.1") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = heat_diffusion_solver(spec, heat_diffusion_kernel_slow);
+    auto u_numerical = solver_slow(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution
@@ -31,7 +30,7 @@ TEST_CASE("test slow kernel for N=64, T=0.05") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = heat_diffusion_solver(spec, heat_diffusion_kernel_slow);
+    auto u_numerical = solver_slow(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution
@@ -47,7 +46,7 @@ TEST_CASE("test slow kernel for N=100, T=0.1") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = heat_diffusion_solver(spec, heat_diffusion_kernel_slow);
+    auto u_numerical = solver_slow(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution
@@ -63,7 +62,7 @@ TEST_CASE("test slow kernel for N=64, T=1.0") {
     const double epsilon = 1e-3;
 
     // Get solutions
-    auto u_numerical = heat_diffusion_solver(spec, heat_diffusion_kernel_slow);
+    auto u_numerical = solver_slow(spec, Mode::eval);
     auto u_analytic = analytic_unit_cube(N, T);
 
     // Compare solver solution to analytic solution
