@@ -1,15 +1,29 @@
 #include "solvers/solvers.hpp"
 #include "util/problem_spec.hpp"
 
+#include <mpi.h>
+
 #include <cmath>
 #include <iostream>
 #include <vector>
 
 void print_usage() {
-    std::cout << "Usage: ./heat_diffusion -N <num_grid_points> -T <total_time> --mode <eval|profile|output> --kernel <slow|fast>\n";
+    std::cout << "Usage: ./heat_diffusion -N <num_grid_points> -T <total_time> --mode <eval|profile|output> --kernel "
+                 "<slow|fast>\n";
 }
 
 int main(int argc, char* argv[]) {
+    // Initialize MPI
+    int rank, size;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    // Temporarily only run rank 0
+    if (rank != 0) {
+        MPI_Finalize();
+        return 0;
+    }
+
     // Version number for printing
     int version = 0;
 
@@ -18,7 +32,7 @@ int main(int argc, char* argv[]) {
     double T = -1;
     std::string kernel_str = "";
     std::string mode_str = "";
-    
+
     for (int i = 0; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "-N" && i + 1 < argc) {
@@ -68,6 +82,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Print problem details
+    std::cout << "Heat Diffusion Simulation\n";
+    std::cout << "Version: " << version << "\n";
+    std::cout << "Grid points (N): " << N << "\n";
+    std::cout << "Total time (T): " << T << "\n";
+    std::cout << "Mode: " << mode_str << "\n";
+    std::cout << "Kernel: " << kernel_str << "\n";
+    std::cout << std::endl;
+
     // Define problem
     auto initial_condition = [](double x, double y, double z) {
         if (std::sqrt((x - 0.5) * (x - 0.5) + (y - 0.5) * (y - 0.5) + (z - 0.5) * (z - 0.5)) < 0.25) {
@@ -87,5 +110,6 @@ int main(int argc, char* argv[]) {
     }
 
     // Return success
+    MPI_Finalize();
     return 0;
 }
