@@ -4,7 +4,7 @@
 #SBATCH -o ./output/profile/distributed_gpu/%j.out
 #SBATCH -N 4
 #SBATCH -n 16
-#SBATCH -t 00:10:00
+#SBATCH -t 01:00:00
 #SBATCH -p mi2104x
 
 set -e

@@ -4,7 +4,7 @@
 #SBATCH -o ./output/output/shared_gpu/output/%j.out
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -t 00:10:00
+#SBATCH -t 01:00:00
 #SBATCH -p mi2104x
 
 set -e
