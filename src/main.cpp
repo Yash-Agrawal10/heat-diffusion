@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
     double T = -1;
     std::string kernel_str = "";
     std::string mode_str = "";
+    bool verbose = false;
 
     for (int i = 0; i < argc; ++i) {
         std::string arg = argv[i];
@@ -43,6 +44,8 @@ int main(int argc, char* argv[]) {
             mode_str = argv[++i];
         } else if (arg == "--kernel" && i + 1 < argc) {
             kernel_str = argv[++i];
+        } else if (arg == "--verbose") {
+            verbose = true;
         }
     }
 
@@ -104,9 +107,9 @@ int main(int argc, char* argv[]) {
     std::vector<double> u;
     // Call correct solver
     if (kernel == Kernel::slow) {
-        u = solver_slow(spec, mode);
+        u = solver_slow(spec, mode, verbose);
     } else {
-        u = solver_fast(spec, mode);
+        u = solver_fast(spec, mode, verbose);
     }
 
     // Return success
